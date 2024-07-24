@@ -1,0 +1,65 @@
+{
+    "task": "Explain the meaning of the text, elaborating beyond your initial understanding of the text.",
+    "scoring_rubric": {
+        "misconception": {
+            "name": "Misconception",
+            "scores": {
+                "BLANK": "Not applicable",
+                "0": "Not present",
+                "1": "Present"
+            }
+        },
+        "monitoring": {
+            "name": "Monitoring",
+            "scores": {
+                "BLANK": "Not applicable",
+                "0": "Not present",
+                "1": "Present"
+            }
+        },
+        "bridgepresence": {
+            "name": "Bridge presence",
+            "scores": {
+                "BLANK": "Not applicable",
+                "0": "Not present/Poor",
+                "1": "Satisfactory",
+                "2": "Good",
+                "3": "Excellent"
+            }
+        },
+        "bridgecontribution": {
+            "name": "Bridge contribution",
+            "scores": {
+                "BLANK": "Not applicable",
+                "1": "Satisfactory",
+                "2": "Excellent"
+            }
+        },
+        "elaborationpresence": {
+            "name": "Elaboration presence",
+            "scores": {
+                "BLANK": "Not applicable",
+                "0": "Not present",
+                "1": "Satisfactory",
+                "2": "Excellent"
+            }
+        },
+        "lifeevent": {
+            "name": "Life event",
+            "scores": {
+                "BLANK": "Not applicable",
+                "0": "Not present",
+                "1": "Present"
+            }
+        },
+        "overall": {
+            "name": "Overall",
+            "scores": {
+                "0": "Poor",
+                "1": "Satisfactory",
+                "2": "Good",
+                "3": "Excellent"
+            }
+        }
+    }
+}

@@ -1,0 +1,59 @@
+{
+    "scoring_rubric": {
+        "ScoreMain": {
+            "name": "Main Idea",
+            "scores": {
+                "1": "Poor",
+                "2": "Fair",
+                "3": "Good",
+                "4": "Excellent"
+            }
+        },
+        "ScoreDetail": {
+            "name": "Details",
+            "scores": {
+                "1": "Poor",
+                "2": "Fair",
+                "3": "Good",
+                "4": "Excellent"
+            }
+        
+        },
+        "ScoreOrg": {
+            "name": "Cohesion",
+            "scores": {
+                "1": "Poor",
+                "2": "Fair",
+                "3": "Good",
+                "4": "Excellent"
+            }
+        },
+        "ScoreVoice": {
+            "name": "Objective language",
+            "scores": {
+                "1": "Poor",
+                "2": "Fair",
+                "3": "Good",
+                "4": "Excellent"
+            }
+        },
+        "ScoreWord": {
+            "name": "Wording",
+            "scores": {
+                "1": "Poor",
+                "2": "Fair",
+                "3": "Good",
+                "4": "Excellent"
+            }
+        },
+        "ScoreLang": {
+            "name": "Language beyond source text",
+            "scores": {
+                "1": "Poor",
+                "2": "Fair",
+                "3": "Good",
+                "4": "Excellent"
+            }
+        }
+    }
+}

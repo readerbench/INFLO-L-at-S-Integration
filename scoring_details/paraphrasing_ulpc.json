@@ -1,0 +1,85 @@
+{
+    "task": "Paraphrase the following sentence.",
+    "scoring_rubric": {
+        "Garbage_Content": {
+            "name": "Garbage Content",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "2": "Too much"
+            }
+        },
+        "Frozen_Expressions": {
+            "name": "Frozen Expressions",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "2": "Too much"
+            }
+        },
+        "Irrelevant": {
+            "name": "Irrelevant",
+            "scores": {
+                "0": "Relevant",
+                "1": "Somewhat relevant",
+                "2": "Irrelevant"
+            }
+        },
+        "Elaboration": {
+            "name": "Elaboration",
+            "scores": {
+                "0": "Not present/Poor",
+                "1": "Good",
+                "2": "Excellent"
+            }
+        },
+        "Semantic_Completeness": {
+            "name": "Semantic Completeness",
+            "scores": {
+                "0": "Not present/Poor",
+                "1": "Good",
+                "2": "Excellent"
+            }
+        },
+        "Entailment": {
+            "name": "Entailment",
+            "scores": {
+                "0": "Not present/Poor",
+                "1": "Good",
+                "2": "Excellent"
+            }
+        },
+        "Syntactic_Similarity": {
+            "name": "Syntactic Similarity",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "2": "Too much"
+            }
+        },
+        "Lexical_Similarity": {
+            "name": "Lexical Similarity",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "2": "Too much"
+            }
+        },
+        "Paraphrase_Quality": {
+            "name": "Paraphrase Quality",
+            "scores": {
+                "0": "Poor",
+                "1": "Good",
+                "2": "Excellent"
+            }
+        },
+        "Writing_Quality": {
+            "name": "Writing Quality",
+            "scores": {
+                "0": "Poor",
+                "1": "Good",
+                "2": "Excellent"
+            }
+        }
+    }
+}
