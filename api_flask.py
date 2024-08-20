@@ -5,7 +5,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-scorer = LLMScoring('readerbench/qwen2_1.5b_scoring_se_ta_su_pa_v3', 'mps')
+scorer = LLMScoring('readerbench/qwen2_1.5b_scoring_se_ta_su_pa_v3', 'cuda')
 
 @app.route('/score/<task>', methods=['POST'] )
 def score(task):
