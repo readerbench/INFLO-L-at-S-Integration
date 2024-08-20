@@ -85,10 +85,11 @@ class LLMScoring:
         Returns:
             str: Scoring rubric prompt
         """
+    
         scoring_rubric_prompt = ""
         for _, dict in scoring_details['scoring_rubric'].items():
-            descriptions = ', '.join([score_description for _, score_description in dict['scores'].items()])
-            scoring_rubric_prompt += f"- {dict['name']}: {descriptions}\n"
+            descriptions = '\n'.join([f"- - {dict['scores'][num]}: {dict['scores_description'][num]}" for num in dict['scores']])
+            scoring_rubric_prompt += f"- {dict['name']}:\n{descriptions}\n"
         scoring_rubric_prompt = scoring_rubric_prompt[:-1]
 
         return scoring_rubric_prompt

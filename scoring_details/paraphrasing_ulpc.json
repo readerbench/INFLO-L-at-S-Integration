@@ -7,6 +7,11 @@
                 "0": "Not present",
                 "1": "Present",
                 "2": "Too much"
+            },
+            "scores_description": {
+                "0": "No incomprehensible input.",
+                "1": "Contains incomprehensible input.",
+                "2": "Contains too much incomprehensible input."
             }
         },
         "Frozen_Expressions": {
@@ -15,6 +20,11 @@
                 "0": "Not present",
                 "1": "Present",
                 "2": "Too much"
+            },
+            "scores_description": {
+                "0": "No sentences that begin with non-paraphrase lexicon.",
+                "1": "Contains sentences that begin with non-paraphrase lexicon.",
+                "2": "Contains too many sentences that begin with non-paraphrase lexicon."
             }
         },
         "Irrelevant": {
@@ -23,6 +33,11 @@
                 "0": "Relevant",
                 "1": "Somewhat relevant",
                 "2": "Irrelevant"
+            },
+            "scores_description": {
+                "0": "No irrelevant content.",
+                "1": "Conatins non-responsive input unrelated to the task.",
+                "2": "Contains too much non-responsive input unrelated to the task."
             }
         },
         "Elaboration": {
@@ -31,6 +46,11 @@
                 "0": "Not present/Poor",
                 "1": "Good",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "0": "There is no elaboration.",
+                "1": "There is a response regarding the theme of the target sentence rather than a restatement of the sentence.",
+                "2": "There is an excellent response regarding the theme of the target sentence rather than a restatement of the sentence."
             }
         },
         "Semantic_Completeness": {
@@ -39,6 +59,11 @@
                 "0": "Not present/Poor",
                 "1": "Good",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "0": "No semnatic completness.",
+                "1": "The user-response has a similar meaning as the target sentence.",
+                "2": "The user-response has the same meaning as the target sentence."
             }
         },
         "Entailment": {
@@ -47,6 +72,11 @@
                 "0": "Not present/Poor",
                 "1": "Good",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "0": "The student response is not entailed by the target sentence.",
+                "1": "The student response is approximately entailed by the target sentence.",
+                "2": "The student response is entirely entailed by the target sentence."
             }
         },
         "Syntactic_Similarity": {
@@ -55,6 +85,11 @@
                 "0": "Not present",
                 "1": "Present",
                 "2": "Too much"
+            },
+            "scores_description": {
+                "0": "No syntactic similarity",
+                "1": "Contains syntactic similarity",
+                "2": "Contains too much syntactic similarity"
             }
         },
         "Lexical_Similarity": {
@@ -63,6 +98,11 @@
                 "0": "Not present",
                 "1": "Present",
                 "2": "Too much"
+            },
+            "scores_description": {
+                "0": "No lexical similarity",
+                "1": "Contains lexical similarity",
+                "2": "Contains too much lexical similarity"
             }
         },
         "Paraphrase_Quality": {
@@ -71,6 +111,11 @@
                 "0": "Poor",
                 "1": "Good",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "0": "The paraphrase is very poor quality.",
+                "1": "The paraphrase is of good quality.",
+                "2": "The paraphrase is of excellent quality."
             }
         },
         "Writing_Quality": {
@@ -79,6 +124,11 @@
                 "0": "Poor",
                 "1": "Good",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "0": "The writing quality is very poor.",
+                "1": "The writing quality is good.",
+                "2": "The writing quality is excellent."
             }
         }
     }

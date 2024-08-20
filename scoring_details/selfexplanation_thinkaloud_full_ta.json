@@ -1,12 +1,56 @@
 {
     "task": "Report your thoughts that immediately come to mind regarding how you understand the meaning of the text.",
     "scoring_rubric": {
+        "paraphrasepresence": {
+            "name": "Paraphrase presence",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "2": "Good"
+            },
+            "scores_description": {
+                "0": "Paraphrase not present.",
+                "1": "Contains at least one full clause that overlaps; may include single words; contains some of (about half) of the main idea units from the target sentence.",
+                "2": "Contains most of (50% or more) of the main idea units from the target sentence."
+            }
+        },
+        "lexicalchange": {
+            "name": "Lexical change",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "BLANK": "Not applicable"
+            },
+            "scores_description": {
+                "0": "No word-level change.",
+                "1": "Changed the words (replaced with synonyms).",
+                "BLANK": "Not applicable"
+            }
+        },
+        "syntacticchange": {
+            "name": "Syntactic change",
+            "scores": {
+                "0": "Not present",
+                "1": "Present",
+                "BLANK": "Not applicable"
+            },
+            "scores_description": {
+                "0": "No syntactic transformation (clause reversals do not constitute a syntactic change).",
+                "1": "Syntactic transformation (need to work out boundaries of tense change).",
+                "BLANK": "Not applicable"
+            }
+        },
         "misconception": {
             "name": "Misconception",
             "scores": {
                 "BLANK": "Not applicable",
                 "0": "Not present",
                 "1": "Present"
+            },
+            "scores_description": {
+                "BLANK": "Not applicable",
+                "0": "Does not include a misconception or an inaccuracy.",
+                "1": "Includes a clear misconception or inaccuracy (misstates information from the text or the prior knowledge brought in reflects a misconception)."
             }
         },
         "monitoring": {
@@ -15,6 +59,11 @@
                 "BLANK": "Not applicable",
                 "0": "Not present",
                 "1": "Present"
+            },
+            "scores_description": {
+                "BLANK": "Not applicable",
+                "0": "Not present.",
+                "1": "Includes evidence of monitoring comprehension such as a statement (I don't know; I wonder; how can they do that)."
             }
         },
         "bridgepresence": {
@@ -25,6 +74,13 @@
                 "1": "Satisfactory",
                 "2": "Good",
                 "3": "Excellent"
+            },
+            "scores_description": {
+                "BLANK": "Not applicable",
+                "0": "Not present.",
+                "1": "Includes anaphoric reference or one or two words from prior text.",
+                "2": "Includes a complete idea that is from the prior text, but vaguely conveyed.",
+                "3": "Includes one or more complete ideas from previous ideas in the text (an idea is not necessarily a sentence, but it is a complete idea unit)."
             }
         },
         "bridgecontribution": {
@@ -33,6 +89,11 @@
                 "BLANK": "Not applicable",
                 "1": "Satisfactory",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "BLANK": "Not applicable",
+                "1": "Local, i.e., only includes ideas from the previous, adjacent sentence.",
+                "2": "Distal, i.e., includes ideas beyond the previous, adjacent sentence."
             }
         },
         "elaborationpresence": {
@@ -42,6 +103,12 @@
                 "0": "Not present",
                 "1": "Satisfactory",
                 "2": "Excellent"
+            },
+            "scores_description": {
+                "BLANK": "Not applicable",
+                "0": "Not present.",
+                "1": "Includes one or two relevant words that were not present in the text and are not synonyms of words in the text. The words must be content-relevant and be a noun or verb (not an adjective or adverb).",
+                "2": "Includes a relevant idea from outside of the text – this idea is not present at all within the text."
             }
         },
         "lifeevent": {
@@ -50,6 +117,11 @@
                 "BLANK": "Not applicable",
                 "0": "Not present",
                 "1": "Present"
+            },
+            "scores_description": {
+                "BLANK": "Not applicable",
+                "0": "Does not include an episodic memory, life event, description of life event, a recollection, or personal anecdote.",
+                "1": "Includes an episodic memory, life event, description of life event, a recollection, or personal anecdote (note that references to self, e.g., I don't have diabetes, is not a recollection about a life event)."
             }
         },
         "overall": {
@@ -59,6 +131,12 @@
                 "1": "Satisfactory",
                 "2": "Good",
                 "3": "Excellent"
+            },
+            "scores_description": {
+                "0": "Self-explanations that contain unrelated or non-informative information or are very short or too similar to the target sentence.",
+                "1": "Self-explanations that either 1) only focus on the target sentence (e.g. paraphrase, comprehension monitoring, brief but related idea, brief prediction) OR 2) has only unclear or incoherent connections to other parts of the text (e.g., weak connections to prior text, simple one-word anaphor resolution).",
+                "2": "Self-explanations that include 1-2 ideas from text outside the target sentence (local bridging, brief elaboration, brief or weak distal bridges).",
+                "3": "High quality self-explanations that incorporate information at a global level (e.g., high quality local bridges, distal bridging, or meaningful elaborations)."
             }
         }
     }
