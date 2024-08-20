@@ -5,7 +5,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-scorer = LLMScoring('readerbench/qwen2_1.5b_scoring_se_ta_su_pa_v3', 'cuda')
+scorer = LLMScoring('readerbench/qwen2_1.5b_scoring_se_ta_su_pa_v3', 'mps')
 
 @app.route('/score/<task>', methods=['POST'] )
 def score(task):
@@ -17,7 +17,6 @@ def score(task):
     except ValueError as e:
         return str(e), 400
     response = jsonify(prediction)
-    response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 200
 
 if __name__ == '__main__':
