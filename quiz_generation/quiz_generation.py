@@ -1,4 +1,4 @@
-from question_generation_utils import QuestionGenerationUtils
+from .question_generation_utils import QuestionGenerationUtils
 
 class QuizGeneration:
     def __init__(self, device, model_name):
