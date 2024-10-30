@@ -17,7 +17,7 @@ class LLMScoring:
         self.model = AutoModelForCausalLM.from_pretrained(model_path)
         self.device = device
         self.model.to(self.device)
-        self.scoring_details_dir = 'scoring_details'
+        self.scoring_details_dir = path.join('learning_strategies_scoring', 'scoring_details')
     
     def generate_response(self, formatted_prompt):
         """

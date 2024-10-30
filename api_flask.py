@@ -1,4 +1,4 @@
-from api_llm_scoring import LLMScoring
+from learning_strategies_scoring.api_llm_scoring import LLMScoring
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
