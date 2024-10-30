@@ -187,9 +187,9 @@ class QuestionGenerationUtils:
                     distractors_ids.append(gen_id)
 
                 response = self.qall_tokenizer.batch_decode(distractors_ids, skip_special_tokens=True)
-
-                all_losses.append(losses)
-                all_responses.append(response)
+                if len(response) == 3:
+                    all_losses.append(losses)
+                    all_responses.append(response)
 
         return all_responses, all_losses
     
@@ -259,7 +259,7 @@ class QuestionGenerationUtils:
                 do_sample=True,
                 temperature=None,
                 top_k=None,
-                top_p=None,
+                top_p=0.9,
                 max_new_tokens=500,
                 num_return_sequences=num_samples,
                 pad_token_id=self.qall_tokenizer.eos_token_id,
@@ -354,6 +354,8 @@ class QuestionGenerationUtils:
 
         response_list = []
         for q, q_loss, a, a_loss, d, d_loss in zip(question_string, question_losses, answer_string, answer_losses, distractor_set_string, distractor_set_losses):
+            if max(d_loss) > 20:
+                continue
             response_list.append({
                 "question": q,
                 "qgen_loss": q_loss,

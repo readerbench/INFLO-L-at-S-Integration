@@ -126,6 +126,7 @@ class QuizGeneration:
         for res in response:
             res['qa_loss_distractors'] = self.qg_utils.get_qa_loss(context, res['question'], res['distractors'])
 
+        response = [res for res in response if len(res["distractors"]) == 3]
         response = sorted(response, key=lambda x: x['qgen_loss'] + 2 * x['qa_loss'] - min(x['qa_loss_distractors']))
 
         return response[:num_final_questions]
