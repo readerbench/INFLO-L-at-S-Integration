@@ -114,3 +114,18 @@ class QuizGeneration:
 
         response = sorted(response, key=lambda x: x['qgen_loss'] + 2 * x['qa_loss'] - min(x['qa_loss_distractors']))
         return response[:num_final_questions]
+    
+    def generate_quiz_everything(self, context, num_samples, num_final_questions):
+        if num_samples < 20:
+            response = self.qg_utils.generate_all_artifacts(context, num_samples)
+        else:
+            response = []
+            for i in range(num_samples // 20):
+                response += self.qg_utils.generate_all_artifacts(context, 20)
+
+        for res in response:
+            res['qa_loss_distractors'] = self.qg_utils.get_qa_loss(context, res['question'], res['distractors'])
+
+        response = sorted(response, key=lambda x: x['qgen_loss'] + 2 * x['qa_loss'] - min(x['qa_loss_distractors']))
+
+        return response[:num_final_questions]
