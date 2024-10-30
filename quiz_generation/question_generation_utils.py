@@ -243,3 +243,124 @@ class QuestionGenerationUtils:
             )
             losses.append(loss.item())
         return losses
+    
+    def generate_all_artifacts(self, context, num_samples):
+        messages = [
+            {"role": "system", "content": "You are an educational expert."},
+            {"role": "user", "content": f"Generate a question, an answer and 3 distractors based on the context.\n\nContext:\n{context}"},
+        ]
+        prompt = self.qall_tokenizer.apply_chat_template(messages, add_special_tokens=False, tokenize=False, add_generation_prompt=True)
+        inputs = self.qall_tokenizer([prompt], return_tensors="pt", max_length=2048, truncation=True, padding='longest').to(self.device)
+
+        with torch.no_grad():
+            outputs = self.qall_model.generate(
+                inputs['input_ids'],
+                attention_mask=inputs['attention_mask'],
+                do_sample=True,
+                temperature=None,
+                top_k=None,
+                top_p=None,
+                max_new_tokens=500,
+                num_return_sequences=num_samples,
+                pad_token_id=self.qall_tokenizer.eos_token_id,
+                output_logits=True,
+                return_dict_in_generate=True,
+            )
+        
+        transposed_logits = torch.transpose(torch.stack(outputs['logits']), 0, 1)
+
+        question_losses = []
+        question_string = []
+        answer_losses = []
+        answer_string = []
+        distractor_set_losses = []
+        distractor_set_string = []
+        token_ids_with_newline = {token_id for token, token_id in self.qall_tokenizer.vocab.items() if 'Ċ' in token}
+
+        for i in range(num_samples):
+            generated_ids = outputs['sequences'][i][len(inputs.input_ids[0]):]
+            generated_logits = transposed_logits[i]
+
+
+            # Question
+            question_start_prompt_ids = self.qall_tokenizer.encode("Question:", add_special_tokens=False)
+            question_end_prompt_ids = self.qall_tokenizer.encode("Answer:", add_special_tokens=False)
+            end_idx_question = self._find_sublist_index(generated_ids.tolist(), question_end_prompt_ids)
+            start_idx_question = self._find_sublist_index(generated_ids.tolist(), question_start_prompt_ids) + len(question_start_prompt_ids)
+
+            generated_ids_question = generated_ids[start_idx_question:end_idx_question]
+            good_logit_question = generated_logits[start_idx_question:end_idx_question]
+
+            loss_question = self.loss_fn(
+                good_logit_question,
+                generated_ids_question,
+            )
+
+            question = self.qall_tokenizer.decode(generated_ids_question, skip_special_tokens=True)
+            question = question.strip()
+            question_string.append(question)
+            question_losses.append(loss_question.item())
+
+            # Answer
+            answer_start_prompt_ids = self.qall_tokenizer.encode("Answer:", add_special_tokens=False)
+            answer_end_prompt_ids = self.qall_tokenizer.encode("Distractors:\n", add_special_tokens=False)
+            end_idx_answer = self._find_sublist_index(generated_ids.tolist(), answer_end_prompt_ids)
+            start_idx_answer = self._find_sublist_index(generated_ids.tolist(), answer_start_prompt_ids) + len(answer_start_prompt_ids)
+
+            generated_ids_answer = generated_ids[start_idx_answer:end_idx_answer]
+            good_logit_answer = generated_logits[start_idx_answer:end_idx_answer]
+
+            loss_answer = self.loss_fn(
+                good_logit_answer,
+                generated_ids_answer,
+            )
+
+            answer = self.qall_tokenizer.decode(generated_ids_answer, skip_special_tokens=True)
+            answer = answer.strip()
+            answer_string.append(answer)
+            answer_losses.append(loss_answer.item())
+
+            # Distractors
+            distractors_start_prompt_ids = self.qall_tokenizer.encode("Distractors:\n", add_special_tokens=False)
+
+            ids = generated_ids.tolist()
+            for i in range(len(ids) - 1, -1, -1):
+                if ids[i] != self.qall_tokenizer.eos_token_id:
+                    end_idx_distractors = min(i + 2, len(ids))
+                    break
+            #end_idx_distractors = find_sublist_index(generated_ids.tolist(), [qall_tokenizer.eos_token_id])
+            start_idx_distractors = self._find_sublist_index(generated_ids.tolist(), distractors_start_prompt_ids) + len(distractors_start_prompt_ids)
+
+            generated_ids_distractors = generated_ids[start_idx_distractors:end_idx_distractors]
+            good_logit_distractors = generated_logits[start_idx_distractors:end_idx_distractors]
+
+            indices = [i+1 for i, x in enumerate(generated_ids_distractors) if x.item() in token_ids_with_newline]
+            generated_ids_splitted = [generated_ids_distractors[j:k] for j, k in zip([0] + indices, indices + [len(generated_ids_distractors)])]
+            generated_logits_splitted = [good_logit_distractors[j:k] for j, k in zip([0] + indices, indices + [len(good_logit_distractors)])]
+
+            losses_distractors = []
+            distractors = []
+
+            for gen_id, gen_logit in zip(generated_ids_splitted, generated_logits_splitted):
+                loss = self.loss_fn(
+                    gen_logit,
+                    gen_id,
+                )
+                losses_distractors.append(loss.item())
+                distractors.append(self.qall_tokenizer.decode(gen_id, skip_special_tokens=True).strip())
+
+            distractor_set_losses.append(losses_distractors)
+            distractor_set_string.append(distractors)
+
+        response_list = []
+        for q, q_loss, a, a_loss, d, d_loss in zip(question_string, question_losses, answer_string, answer_losses, distractor_set_string, distractor_set_losses):
+            response_list.append({
+                "question": q,
+                "qgen_loss": q_loss,
+                "answer": a,
+                "qa_loss": a_loss,
+                "distractors": d,
+                "dgen_loss": d_loss,
+            })
+
+        return response_list
