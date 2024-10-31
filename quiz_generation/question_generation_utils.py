@@ -1,5 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+from sentence_transformers import SentenceTransformer, util
 
 class QuestionGenerationUtils:
     def __init__(self, device, model_name):
@@ -13,6 +14,7 @@ class QuestionGenerationUtils:
         self.qall_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
         self.qall_tokenizer.pad_token_id = self.qall_tokenizer.eos_token_id
         self.loss_fn = torch.nn.CrossEntropyLoss(reduction='sum')
+        self.emb_model = SentenceTransformer('all-MiniLM-L6-v2').to(device)
 
     def _find_sublist_index(self, main_list, sublist):
         n, m = len(main_list), len(sublist)
@@ -364,3 +366,11 @@ class QuestionGenerationUtils:
             })
 
         return response_list
+    
+    def calculate_sentence_embeddings(self, sentences_list):
+        embeddings = self.emb_model.encode(sentences_list, convert_to_tensor=True)
+        embeddings_list = [emb for emb in embeddings]
+        return embeddings_list
+
+    def get_cosine_similarity(self, emb1, emb2):
+        return util.pytorch_cos_sim(emb1, emb2).item()
