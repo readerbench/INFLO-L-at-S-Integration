@@ -1,4 +1,4 @@
-from question_generation_utils import QuestionGenerationUtils
+from .question_generation_utils import QuestionGenerationUtils
 
 class QuizGeneration:
     def __init__(self, device, model_name):
@@ -148,6 +148,7 @@ class QuizGeneration:
         for res in response:
             res['qa_loss_distractors'] = self.qg_utils.get_qa_loss(context, res['question'], res['distractors'])
 
+        response = [res for res in response if len(res["distractors"]) == 3]
         response = sorted(response, key=lambda x: x['qgen_loss'] + 2 * x['qa_loss'] - min(x['qa_loss_distractors']))
 
         embeddings = self.qg_utils.get_embeddings([res['question'] for res in response])
