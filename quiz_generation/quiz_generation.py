@@ -148,10 +148,14 @@ class QuizGeneration:
         for res in response:
             res['qa_loss_distractors'] = self.qg_utils.get_qa_loss(context, res['question'], res['distractors'])
 
-        response = [res for res in response if len(res["distractors"]) == 3]
+        response = [
+            res 
+            for res in response 
+            if len(res["distractors"]) == 3 and min(res['qa_loss_distractors']) - res["qa_loss"] > 1
+        ]
         response = sorted(response, key=lambda x: x['qgen_loss'] + x['qa_loss'] + 0.5 * (x['qa_loss'] - min(x['qa_loss_distractors'])))
 
-        embeddings = self.qg_utils.get_embeddings([res['question'] for res in response])
+        embeddings = self.qg_utils.calculate_sentence_embeddings([res['question'] + "\n" + res["answer"] for res in response])
         response = self._eliminate_duplicates_questions(response, embeddings)
 
         return response[:num_final_questions]
