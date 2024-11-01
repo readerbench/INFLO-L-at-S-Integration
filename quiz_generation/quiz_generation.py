@@ -28,19 +28,24 @@ class QuizGeneration:
 
         return dp[m][n]
 
-    def _is_duplicate(self, str1, str2):
+    def _is_duplicate_answer(self, str1, str2):
         if self._levenstein_distance(str1.lower(), str2.lower()) <= 1:
             return True
         return False
     
-    def _eliminate_duplicates(self, answers, losses):
+    def _is_duplicate_question(self, emb1, emb2):
+        if self.qg_utils.get_cosine_similarity(emb1, emb2) >= 0.8:
+            return True
+        return False
+    
+    def _eliminate_duplicates_answers(self, answers, losses):
         answers_dedup = []
         losses_dedup = []
 
         for i in range(len(answers)):
             duplicate = False
             for j in range(len(answers_dedup)):
-                if self._is_duplicate(answers[i], answers_dedup[j]):
+                if self._is_duplicate_answer(answers[i], answers_dedup[j]):
                     duplicate = True
                     break
             if not duplicate:
@@ -48,7 +53,20 @@ class QuizGeneration:
                 losses_dedup.append(losses[i])
 
         return answers_dedup, losses_dedup
+    
+    def _eliminate_duplicates_questions(self, questions, embeddings):
+        response_filtered = [questions[0]]
+        for i in range(1, len(questions)):
+            duplicate = False
+            for j in range(len(response_filtered)):
+                if self._is_duplicate_question(embeddings[i], embeddings[j]):
+                    duplicate = True
+                    break
+            if not duplicate:
+                response_filtered.append(questions[i])
 
+        return response_filtered
+    
     def generate_quiz_pipeline(self, context, num_samples_questions=20, num_samples_answers=10, num_chosen_answers=2, num_samples_distractors=10, num_final_questions=10):
         response = []
         questions, qgen_lossess = self.qg_utils.generate_all_questions(context, num_samples_questions)
@@ -67,7 +85,7 @@ class QuizGeneration:
                 answers = [a.strip() for _, a in sorted(zip(qa_lossess, answers), key=lambda pair: pair[0])]
                 qa_lossess = [loss for loss in sorted(qa_lossess)]
 
-                answers, qa_lossess = self._eliminate_duplicates(answers, qa_lossess)
+                answers, qa_lossess = self._eliminate_duplicates_answers(answers, qa_lossess)
 
                 answers = answers[:num_chosen_answers]
 
@@ -113,6 +131,10 @@ class QuizGeneration:
                 pass
 
         response = sorted(response, key=lambda x: x['qgen_loss'] + 2 * x['qa_loss'] - min(x['qa_loss_distractors']))
+
+        embeddings = self.qg_utils.get_embeddings([res['question'] for res in response])
+        response = self._eliminate_duplicates_questions(response, embeddings)
+
         return response[:num_final_questions]
     
     def generate_quiz_everything(self, context, num_samples, num_final_questions):
@@ -128,5 +150,8 @@ class QuizGeneration:
 
         response = [res for res in response if len(res["distractors"]) == 3]
         response = sorted(response, key=lambda x: x['qgen_loss'] + x['qa_loss'] + 0.5 * (x['qa_loss'] - min(x['qa_loss_distractors'])))
+
+        embeddings = self.qg_utils.get_embeddings([res['question'] for res in response])
+        response = self._eliminate_duplicates_questions(response, embeddings)
 
         return response[:num_final_questions]
