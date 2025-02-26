@@ -3,15 +3,15 @@ import torch
 from sentence_transformers import SentenceTransformer, util
 
 class QuestionGenerationUtils:
-    def __init__(self, device, model_name):
+    def __init__(self, device, model_name, token=None):
         if device not in ['cpu', 'cuda', 'mps']:
             raise ValueError(f"Invalid device: {device}. Must be one of 'cpu', 'cuda', 'mps'.")
         if not model_name:
             raise ValueError("Model name must be provided.")
         
         self.device = device
-        self.qall_tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
-        self.qall_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+        self.qall_tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left", token=token)
+        self.qall_model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", token=token)
         self.qall_tokenizer.pad_token_id = self.qall_tokenizer.eos_token_id
         self.loss_fn = torch.nn.CrossEntropyLoss(reduction='sum')
         self.emb_model = SentenceTransformer('all-MiniLM-L6-v2').to(device)
@@ -246,6 +246,157 @@ class QuestionGenerationUtils:
             losses.append(loss.item())
         return losses
     
+    def _split_token_ids_get_text_and_loss(self, my_generated_ids, my_logits, start_prompt_text, end_prompt_text):
+        start_idx_question = 0
+        end_idx_question = len(my_generated_ids)
+
+        if start_prompt_text:
+            start_prompt_ids = self.qall_tokenizer.encode(start_prompt_text, add_special_tokens=False)
+            start_idx_question = self._find_sublist_index(my_generated_ids.tolist(), start_prompt_ids) + len(start_prompt_ids)
+        if end_prompt_text:
+            end_prompt_ids = self.qall_tokenizer.encode(end_prompt_text, add_special_tokens=False)
+            end_idx_question = self._find_sublist_index(my_generated_ids.tolist(), end_prompt_ids)
+
+        good_my_generated_ids = my_generated_ids[start_idx_question:end_idx_question]
+        good_my_logits = my_logits[start_idx_question:end_idx_question]
+
+        my_loss = self.loss_fn(
+            good_my_logits,
+            good_my_generated_ids,
+        )
+
+        good_text = self.qall_tokenizer.decode(good_my_generated_ids, skip_special_tokens=True)
+        good_text = good_text.strip()
+
+        return good_text, my_loss.item()
+
+    def generate_all_artifacts_with_explanations(self, context, num_samples):
+        messages = [
+            {"role": "system", "content": "You are an educational expert."},
+            {"role": "user", "content": f"Generate a question, an answer and 3 distractors based on the context.\n\n\n\nContext:\n{context}"}
+        ]
+        prompt = self.qall_tokenizer.apply_chat_template(messages, add_special_tokens=False, tokenize=False, add_generation_prompt=True)
+        inputs = self.qall_tokenizer([prompt], return_tensors="pt", max_length=2048, truncation=True, padding='longest').to(self.device)
+
+        with torch.no_grad():
+            outputs = self.qall_model.generate(
+                inputs['input_ids'],
+                attention_mask=inputs['attention_mask'],
+                do_sample=True,
+                temperature=None,
+                top_k=None,
+                top_p=0.9,
+                max_new_tokens=1000,
+                num_return_sequences=num_samples,
+                pad_token_id=self.qall_tokenizer.eos_token_id,
+                output_logits=True,
+                return_dict_in_generate=True,
+            )
+        
+        transposed_logits = torch.transpose(torch.stack(outputs['logits']), 0, 1)
+
+        question_losses = []
+        question_string = []
+        answer_losses = []
+        answer_string = []
+        answer_explanation_losses = []
+        answer_explanation_string = []
+        distractor_set_losses = []
+        distractor_set_string = []
+
+        token_ids_with_newline = {token_id for token, token_id in self.qall_tokenizer.vocab.items() if 'Ċ' in token}
+        token_ids_with_two_newlines = {token_id for token, token_id in self.qall_tokenizer.vocab.items() if 'ĊĊ' in token}
+
+        response_list = []
+        for i in range(num_samples):
+            
+            generated_ids = outputs['sequences'][i][len(inputs.input_ids[0]):]
+            generated_logits = transposed_logits[i]
+
+            # Question
+            question_text, question_loss = self._split_token_ids_get_text_and_loss(
+                generated_ids, generated_logits, 
+                "Question:", "Answer explanation:"
+            )
+            question_string.append(question_text)
+            question_losses.append(question_loss)
+
+            # Answer explanation
+            answer_explanation_text, answer_explanation_loss = self._split_token_ids_get_text_and_loss(
+                generated_ids, generated_logits, 
+                "Answer explanation:", "Answer:"
+            )
+            answer_explanation_string.append(answer_explanation_text)
+            answer_explanation_losses.append(answer_explanation_loss)
+
+            # Answer
+            answer_text, answer_loss = self._split_token_ids_get_text_and_loss(
+                generated_ids, generated_logits, 
+                "Answer:", "Distractors:\n"
+            )
+            answer_string.append(answer_text)
+            answer_losses.append(answer_loss)
+
+            # Distractors
+            distractors_start_prompt_ids = self.qall_tokenizer.encode("Distractors:\n", add_special_tokens=False)
+
+            ids = generated_ids.tolist()
+            for i in range(len(ids) - 1, -1, -1):
+                if ids[i] != self.qall_tokenizer.eos_token_id:
+                    end_idx_distractors = min(i + 2, len(ids))
+                    break
+            #end_idx_distractors = find_sublist_index(generated_ids.tolist(), [qall_tokenizer.eos_token_id])
+            start_idx_distractors = self._find_sublist_index(generated_ids.tolist(), distractors_start_prompt_ids) + len(distractors_start_prompt_ids)
+
+            generated_ids_distractors = generated_ids[start_idx_distractors:end_idx_distractors]
+            good_logit_distractors = generated_logits[start_idx_distractors:end_idx_distractors]
+
+            indices = [i+1 for i, x in enumerate(generated_ids_distractors) if x.item() in token_ids_with_two_newlines]
+            generated_distractors_ids_splitted = [generated_ids_distractors[j:k] for j, k in zip([0] + indices, indices + [len(generated_ids_distractors)])]
+            generated_distractors_logits_splitted = [good_logit_distractors[j:k] for j, k in zip([0] + indices, indices + [len(good_logit_distractors)])]
+
+            losses_distractors = []
+            distractors = []
+
+            for gen_distractor_ids, gen_distractor_logits in zip(generated_distractors_ids_splitted, generated_distractors_logits_splitted):
+                # Distractor category
+                distractor_category_text, distractor_category_loss = self._split_token_ids_get_text_and_loss(gen_distractor_ids, gen_distractor_logits, "Distractor category:", "Distractor explanation:")
+
+                # Distractor explanation
+                distractor_explanation_text, distractor_explanation_loss = self._split_token_ids_get_text_and_loss(gen_distractor_ids, gen_distractor_logits, "Distractor explanation:", "Distractor:")
+                
+                # Distractor
+                distractor_text, distractor_loss = self._split_token_ids_get_text_and_loss(gen_distractor_ids, gen_distractor_logits, "Distractor:", None)
+                
+                distractors.append({
+                    'category': distractor_category_text,
+                    'explanation': distractor_explanation_text,
+                    'distractor': distractor_text,
+                })
+                losses_distractors.append({
+                    'category': distractor_category_loss,
+                    'explanation': distractor_explanation_loss,
+                    'distractor': distractor_loss,
+                })
+
+            distractor_set_losses.append(losses_distractors)
+            distractor_set_string.append(distractors)
+
+        response_list = []
+        for q, q_loss, ae, ae_loss, a, a_loss, d, d_loss in zip(question_string, question_losses, answer_explanation_string, answer_explanation_losses, answer_string, answer_losses, distractor_set_string, distractor_set_losses):
+            response_list.append({
+                "question_text": q,
+                "question_loss": q_loss,
+                "answer_explanation_text": ae,
+                "answer_explanation_loss": ae_loss,
+                "answer_text": a,
+                "answer_loss": a_loss,
+                "distractors_text": d,
+                "distractors_loss": d_loss,
+            })
+
+        return response_list
+    
     def generate_all_artifacts(self, context, num_samples):
         messages = [
             {"role": "system", "content": "You are an educational expert."},
@@ -262,7 +413,7 @@ class QuestionGenerationUtils:
                 temperature=None,
                 top_k=None,
                 top_p=0.9,
-                max_new_tokens=500,
+                max_new_tokens=1000,
                 num_return_sequences=num_samples,
                 pad_token_id=self.qall_tokenizer.eos_token_id,
                 output_logits=True,
@@ -356,8 +507,8 @@ class QuestionGenerationUtils:
 
         response_list = []
         for q, q_loss, a, a_loss, d, d_loss in zip(question_string, question_losses, answer_string, answer_losses, distractor_set_string, distractor_set_losses):
-            if max(d_loss) > 20:
-                continue
+            #if max(d_loss) > 20:
+            #    continue
             response_list.append({
                 "question": q,
                 "qgen_loss": q_loss,
@@ -368,6 +519,7 @@ class QuestionGenerationUtils:
             })
 
         return response_list
+
     
     def calculate_sentence_embeddings(self, sentences_list):
         embeddings = self.emb_model.encode(sentences_list, convert_to_tensor=True)
