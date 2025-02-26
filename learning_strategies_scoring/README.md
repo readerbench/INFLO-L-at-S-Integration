@@ -32,7 +32,6 @@ data = {
 task = 'summary'
 data = {
     'context': "The supporting text that the student has read.",
-    'question': "A description of the summarization task (what to focus on).",
     'student_response': "The student's summary",
 }
 ```

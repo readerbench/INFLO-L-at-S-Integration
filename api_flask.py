@@ -9,7 +9,7 @@ from quiz_generation.quiz_generation import QuizGeneration
 app = Flask(__name__)
 CORS(app)
 device = "cuda"
-scorer = LLMScoring('readerbench/qwen2_1.5b_scoring_se_ta_su_pa_v3', device=device)
+scorer = LLMScoring('upb-nlp/llama32_3b_scoring_all_tasks', device=device)
 quiz_generators = {
     "1B": QuizGeneration(device=device, model_name="readerbench/llama3.2_1b_instruct_qall_lr_small"),
     "3B": QuizGeneration(device=device, model_name="readerbench/llama3.2_3b_instruct_qall_lr_small"),

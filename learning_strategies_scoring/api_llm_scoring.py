@@ -43,6 +43,7 @@ class LLMScoring:
             top_p=None,
             top_k=None,
             temperature=None,
+            do_sample=False,
         )
         generated_ids = [
             output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
@@ -149,7 +150,7 @@ class LLMScoring:
 
             prompt = f"{scoring_start_prompt}\n\n### Task description: {task_prompt}\n\n- Sentence: {data['target_sentence']}\n\n### Execution: {data['student_response']}\n\n### Scoring rubric:\n{scoring_rubric_prompt}"
 
-        return f"{prompt}\n\n### Response:"
+        return self.tokenizer.apply_chat_template([{"role": "user", "content": prompt}], add_special_tokens=False, tokenize=False, add_generation_prompt=True)
 
     def score(self, data, task):
         """
