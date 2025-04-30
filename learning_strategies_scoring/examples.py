@@ -1,6 +1,6 @@
 from api_llm_scoring import LLMScoring
 
-llm_scoring = LLMScoring('readerbench/qwen2_1.5b_scoring_se_ta_su_pa_v3', 'cuda')
+llm_scoring = LLMScoring('upb-nlp/llama32_3b_scoring_all_tasks', 'cuda')
 
 my_data = {
     'target_sentence': "Sometimes blood does not transport enough oxygen, resulting in a condition called anemia.",
