@@ -89,7 +89,7 @@ class LLMScoring:
 
         if task == 'selfexplanation':
             if 'context' not in data or 'target_sentence' not in data or 'student_response' not in data:
-                raise ValueError('Data must contain context, target_sentence and student_response fields')
+                raise ValueError('Data must contain context, target_sentence, and student_response fields')
             
             scoring_details = json.load(open(path.join(self.scoring_details_dir, 'selfexplanation_thinkaloud_full_se.json'), 'r'))
             task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
@@ -98,7 +98,7 @@ class LLMScoring:
 
         elif task == 'thinkaloud':
             if 'context' not in data or 'target_sentence' not in data or 'student_response' not in data:
-                raise ValueError('Data must contain context, target_sentence and student_response fields')
+                raise ValueError('Data must contain context, target_sentence, and student_response fields')
 
             scoring_details = json.load(open(path.join(self.scoring_details_dir, 'selfexplanation_thinkaloud_full_ta.json'), 'r'))
             task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
@@ -107,7 +107,7 @@ class LLMScoring:
 
         elif task == 'summary':
             if 'context' not in data or 'student_response' not in data:
-                raise ValueError('Data must contain context, question and student_response fields')
+                raise ValueError('Data must contain context and student_response fields')
 
             scoring_details = json.load(open(path.join(self.scoring_details_dir, 'summaries_aloe.json'), 'r'))
             task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
