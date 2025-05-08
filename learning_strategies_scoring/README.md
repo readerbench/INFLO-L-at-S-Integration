@@ -4,7 +4,7 @@ The API for scoring a student response (self-explanation, think-aloud, summary o
 
 The scoring class (`LLMScoring`) must be instantiated only once (it will load the fine-tuned LLM and initialize the model and tokenizer). At the fist initialization, it will download the model from HuggingFace, and then it will load it every time from local.
 
-There are two parameters: The HuggingFace location of the model's repo (`readerbench/...`) and the device on which the model will run (`cpu`, `cuda` or `mps` for Mac).
+There are two parameters: The HuggingFace location of the model's repo (`upn-nlp/...`) and the device on which the model will run (`cpu`, `cuda` or `mps` for Mac).
 
 The scoring for students' responses can be called with the method `.score(data, task)`. 
 
