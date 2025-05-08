@@ -1,5 +1,17 @@
 {
     "task": "Explain the meaning of the text, elaborating beyond your initial understanding of the text.",
+    "scoring_rubric_list": [
+        "paraphrasepresence",
+        "lexicalchange",
+        "syntacticchange",
+        "misconception",
+        "monitoring",
+        "bridgepresence",
+        "bridgecontribution",
+        "elaborationpresence",
+        "lifeevent",
+        "overall"
+    ],
     "scoring_rubric": {
         "paraphrasepresence": {
             "name": "Paraphrase presence",

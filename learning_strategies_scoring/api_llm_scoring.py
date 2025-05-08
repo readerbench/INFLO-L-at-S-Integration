@@ -64,13 +64,14 @@ class LLMScoring:
             str: Scoring rubric prompt
         """
     
+        task_prompt = scoring_details['task']
         scoring_rubric_prompt = ""
         for _, dict in scoring_details['scoring_rubric'].items():
             descriptions = '\n'.join([f"- - {dict['scores'][num]}: {dict['scores_description'][num]}" for num in dict['scores']])
             scoring_rubric_prompt += f"- {dict['name']}:\n{descriptions}\n"
         scoring_rubric_prompt = scoring_rubric_prompt[:-1]
 
-        return scoring_rubric_prompt
+        return task_prompt, scoring_rubric_prompt
 
 
     def prepare_prompt(self, data, task):
@@ -91,8 +92,7 @@ class LLMScoring:
                 raise ValueError('Data must contain context, target_sentence and student_response fields')
             
             scoring_details = json.load(open(path.join(self.scoring_details_dir, 'selfexplanation_thinkaloud_full_se.json'), 'r'))
-            task_prompt = scoring_details['task']
-            scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
+            task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
 
             prompt = f"{scoring_start_prompt}\n\n### Task description: {task_prompt}\n\n- Context: {data['context']}\n\n- Phrase: {data['target_sentence']}\n\n### Execution: {data['student_response']}\n\n### Scoring rubric:\n{scoring_rubric_prompt}"
 
@@ -101,19 +101,16 @@ class LLMScoring:
                 raise ValueError('Data must contain context, target_sentence and student_response fields')
 
             scoring_details = json.load(open(path.join(self.scoring_details_dir, 'selfexplanation_thinkaloud_full_ta.json'), 'r'))
-            task_prompt = scoring_details['task']
-            scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
+            task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
 
             prompt = f"{scoring_start_prompt}\n\n### Task description: {task_prompt}\n\n- Context: {data['context']}\n\n- Phrase: {data['target_sentence']}\n\n### Execution: {data['student_response']}\n\n### Scoring rubric:\n{scoring_rubric_prompt}"
 
         elif task == 'summary':
-            if 'context' not in data or 'question' not in data or 'student_response' not in data:
+            if 'context' not in data or 'student_response' not in data:
                 raise ValueError('Data must contain context, question and student_response fields')
 
-            scoring_details = json.load(open(path.join(self.scoring_details_dir, 'summaries_classe.json'), 'r'))
-            scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
-
-            task_prompt = data['question']
+            scoring_details = json.load(open(path.join(self.scoring_details_dir, 'summaries_aloe.json'), 'r'))
+            task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
 
             prompt = f"{scoring_start_prompt}\n\n### Task description: {task_prompt}\n\n- Context: {data['context']}\n\n### Execution: {data['student_response']}\n\n### Scoring rubric:\n{scoring_rubric_prompt}"
         
@@ -122,8 +119,7 @@ class LLMScoring:
                 raise ValueError('Data must contain target_sentence and student_response fields')
 
             scoring_details = json.load(open(path.join(self.scoring_details_dir, 'paraphrasing_ulpc.json'), 'r'))
-            task_prompt = scoring_details['task']
-            scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
+            task_prompt, scoring_rubric_prompt = self.prepare_scoring_rubric_prompt(scoring_details)
 
             prompt = f"{scoring_start_prompt}\n\n### Task description: {task_prompt}\n\n- Sentence: {data['target_sentence']}\n\n### Execution: {data['student_response']}\n\n### Scoring rubric:\n{scoring_rubric_prompt}"
 

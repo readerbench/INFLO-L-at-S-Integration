@@ -1,5 +1,17 @@
 {
     "task": "Paraphrase the following sentence.",
+    "scoring_rubric_list": [
+        "Garbage_Content",
+        "Frozen_Expressions",
+        "Irrelevant",
+        "Elaboration",
+        "Semantic_Completeness",
+        "Entailment",
+        "Syntactic_Similarity",
+        "Lexical_Similarity",
+        "Paraphrase_Quality",
+        "Writing_Quality"
+    ],
     "scoring_rubric": {
         "Garbage_Content": {
             "name": "Garbage Content",

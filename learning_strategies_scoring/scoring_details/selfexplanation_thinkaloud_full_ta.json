@@ -1,5 +1,17 @@
 {
     "task": "Report your thoughts that immediately come to mind regarding how you understand the meaning of the text.",
+    "scoring_rubric_list": [
+        "paraphrasepresence",
+        "lexicalchange",
+        "syntacticchange",
+        "misconception",
+        "monitoring",
+        "bridgepresence",
+        "bridgecontribution",
+        "elaborationpresence",
+        "lifeevent",
+        "overall"
+    ],
     "scoring_rubric": {
         "paraphrasepresence": {
             "name": "Paraphrase presence",
